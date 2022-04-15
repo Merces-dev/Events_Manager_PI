@@ -15,6 +15,8 @@ void paginacao(){
     case 2:
         printf("\nAdquirir Ingresso!\n");
         break;
+    case 3:
+        break;
     default:
         printf("\nPágina não existente!\n");
     }
