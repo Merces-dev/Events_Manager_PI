@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1650044985 source:c:\cpp\events_manager_pi\main.cpp
+	<conio.h>
+	<stdio.h>
+	<string.h>
+	<locale.h>
+
