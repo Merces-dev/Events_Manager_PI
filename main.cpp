@@ -24,20 +24,64 @@ void readEventsFile(){
             getline(ip, local, ',');
             getline(ip, hours, '\n');
             printf("%s\t\t\t%s\t\t\t%s\t\t\t%s\n", code.c_str(), name.c_str(), local.c_str(), hours.c_str());
-
         };
     }
-
 }
-
-void writeEventsFile(){
-    FILE* arquivo = fopen("events.csv", "a+");
+writeFile(FILE* arquivo, char tipo[128]){
     if(arquivo == NULL){
-        printf("\n\n\nErro ao obter eventos dispon�veis\n\n\n");
+        printf("\n\n\nErro ao obter eventos disponíveis\n\n\n");
     }else{
-        fprintf(arquivo, "\n%u,%u,%u,%u\n", 1,1,1,1);
+        if(tipo == "events"){
+            char codigo[128], nome[128], local[128];
+            int qtdHoras = 0;
+            printf("\nDigite o codigo do evento:\n");
+            scanf("%s",&codigo);
+            printf("\nDigite o nome do evento:\n");
+            scanf("%s",&nome);
+            printf("\nDigite o local do evento:\n");
+            scanf("%s",&local);
+            printf("\nDigite a qtd. de horas extracurriculares do evento:\n");
+            scanf("%d", &qtdHoras);
+
+            fprintf(arquivo, "%s,%s,%s,%d\n", codigo,nome,local,qtdHoras);
+        }else if(tipo == "users"){
+            char nome[128], email[128], senha[128];
+            printf("\nDigite o nome do usuario:\n");
+            scanf("%s",&nome);
+            printf("\nDigite o email do usuario:\n");
+            scanf("%s",&email);
+            printf("\nDigite a senha do usuario:\n");
+            scanf("%s",&senha);
+
+            fprintf(arquivo, "%s,%s,%s\n", nome,email,senha);
+        }else if(tipo == "tickets"){
+                char id[128], usuario[128], evento[128];
+                printf("\nDigite o id do ingresso:\n");
+                scanf("%s",&id);
+                printf("\nDigite o codigo do usuario:\n");
+                scanf("%s",&usuario);
+                printf("\nDigite o codigo do evento:\n");
+                scanf("%s",&evento);
+
+                fprintf(arquivo, "%s,%s,%s\n", id,usuario,evento);
+        }else{
+            printf("Tipo de escrita nao encontrado");
+        };
+
         fclose(arquivo);
     }
+}
+void writeTicketsFile(){
+    FILE* arquivo = fopen("tickets.csv", "a+");
+    writeFile(arquivo, "tickets");
+}
+void writeUsersFile(){
+    FILE* arquivo = fopen("users.csv", "a+");
+    writeFile(arquivo, "users");
+}
+void writeEventsFile(){
+    FILE* arquivo = fopen("events.csv", "a+");
+    writeFile(arquivo, "events");
 }
 
 void paginacao(){
