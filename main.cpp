@@ -5,8 +5,8 @@
 #include <iostream>
 #include <fstream>
 
-int pagina;
 using namespace std;
+int pagina;
 
 void readEventsFile(){
     ifstream ip("events.csv");
@@ -30,6 +30,15 @@ void readEventsFile(){
 
 }
 
+void writeEventsFile(){
+    FILE* arquivo = fopen("events.csv", "a+");
+    if(arquivo == NULL){
+        printf("\n\n\nErro ao obter eventos dispon�veis\n\n\n");
+    }else{
+        fprintf(arquivo, "\n%u,%u,%u,%u\n", 1,1,1,1);
+        fclose(arquivo);
+    }
+}
 
 void paginacao(){
     printf("\nDigite o valor referente a Tela: \n1 ==== Visualizar Eventos\n2 ==== Adquirir Ingresso\n3 ==== Sair\n\n\nTela Escolhida: ");
@@ -41,11 +50,12 @@ void paginacao(){
         break;
     case 2:
         printf("\nAdquirir Ingresso!\n");
+        writeEventsFile();
         break;
     case 3:
         break;
     default:
-        printf("\nP�gina n�o existente!\n");
+        printf("\nPágina não existente!\n");
     }
 
     while(pagina != 3){
