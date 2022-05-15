@@ -7,155 +7,200 @@
 
 using namespace std;
 int pagina;
-char* userCode;
-const char* userType;
+char userCode[20];
+int userType = 0;
 
-void readFile(const char* arquivo){
-    ifstream ip(arquivo);
-    if(!ip.is_open()){
-        printf("\n\n\nErro ao obter eventos dispon�veis\n\n\n");
-    }else{
-        if(strcmp( arquivo, "events.csv") == 0){
+char* generateTicket (char* tipo){
+    char* ch = new char;
+    strcpy(ch,tipo);
+    strcat(ch,userCode);
+    return ch;
+}
 
-                string code, name, local, hours;
+void login(){
+    setlocale(LC_ALL, "Portuguese");
+    printf("Digite seu código de usuário:");
+    scanf("%s", userCode);
+}
 
-                while(ip.good()){
-                    getline(ip, code, ',');
-                    getline(ip, name, ',');
-                    getline(ip, local, ',');
-                    getline(ip, hours, '\n');
-                    printf("%s\t\t\t%s\t\t\t%s\t\t\t%s\n", code.c_str(), name.c_str(), local.c_str(), hours.c_str());
-                };
-        }else if(strcmp( arquivo, "users.csv") == 0){
-                string code, type;
-                while(ip.good()){
-                    getline(ip, code, ',');
-                    getline(ip, type, ',');
-                    if(code == userCode){
-
-                        break;
-                    };
+void readFile(std::ifstream &ip, const char *tipo)
+{
+    if (!ip.is_open())
+    {
+        printf("\n\n\nErro ao ler arquivo\n\n\n");
+    }
+    else
+    {
+        if (strcmp(tipo, "events") == 0 )
+        {
+            string code, name, local, hours;
+            while (ip.good())
+            {
+                getline(ip, code, ',');
+                getline(ip, name, ',');
+                getline(ip, local, ',');
+                getline(ip, hours, '\n');
+                printf("%s\t%s\t%s\t%s\n", code.c_str(), name.c_str(), local.c_str(), hours.c_str());
+            };
+        }
+        else if (strcmp(tipo, "users") == 0)
+        {
+            string code, type;
+            while (ip.good())
+            {
+                getline(ip, code, ',');
+                getline(ip, type, '\n');
+                if (strcmp(code.c_str(), userCode) == 0)
+                {
+                    if (strcmp(type.c_str(), "admin") == 0)
+                    {
+                        userType = 1;
+                    }
+                    else
+                    {
+                        userType = 2;
+                    }
                 };
             };
         };
+        ip.close();
+    };
 };
-void readEventsFile(){
-    readFile("events.csv");
+void readEventsFile()
+{
+    ifstream ip("events.csv");
+    readFile(ip, "events");
 }
-void readUsersFile(){
-    readFile("users.csv");
+void readUsersFile()
+{
+    ifstream ip("users.csv");
+    readFile(ip, "users");
 }
 
-void writeFile(FILE* arquivo, const char* tipo){
-    if(arquivo == NULL){
-        printf("\n\n\nErro ao obter eventos disponíveis\n\n\n");
-    }else{
-        if(strcmp( tipo, "events") == 0){
+void writeFile(FILE *arquivo, const char *tipo)
+{
+    if (arquivo == NULL)
+    {
+        printf("\n\n\nErro ao obter eventos dispon�veis\n\n\n");
+    }
+    else
+    {
+        if (strcmp(tipo, "events") == 0)
+        {
             char codigo[128], nome[128], local[128];
             int qtdHoras = 0;
             printf("\nDigite o codigo do evento:\n");
-            scanf("%s",codigo);
+            scanf("%s", codigo);
             printf("\nDigite o nome do evento:\n");
-            scanf("%s",nome);
+            scanf("%s", nome);
             printf("\nDigite o local do evento:\n");
-            scanf("%s",local);
+            scanf("%s", local);
             printf("\nDigite a qtd. de horas extracurriculares do evento:\n");
             scanf("%d", &qtdHoras);
 
-            fprintf(arquivo, "%s,%s,%s,%d\n", codigo,nome,local,qtdHoras);
-        }else if(strcmp( tipo, "users") == 0){
+            fprintf(arquivo, "%s,%s,%s,%d\n", codigo, nome, local, qtdHoras);
+        }
+        else if (strcmp(tipo, "users") == 0)
+        {
             char nome[128], email[128], senha[128];
-            printf("\nDigite o nome do usuario:\n" );
-            scanf("%s",nome);
+            printf("\nDigite o nome do usuario:\n");
+            scanf("%s", nome);
             printf("\nDigite o email do usuario:\n");
-            scanf("%s",email);
+            scanf("%s", email);
             printf("\nDigite a senha do usuario:\n");
-            scanf("%s",senha);
+            scanf("%s", senha);
 
-            fprintf(arquivo, "%s,%s,%s\n", nome,email,senha);
-        }else if(strcmp( tipo, "tickets") == 0){
-                char id[128], usuario[128], evento[128];
-                printf("\nDigite o id do ingresso:\n");
-                scanf("%s",id);
-                printf("\nDigite o codigo do usuario:\n");
-                scanf("%s",usuario);
-                printf("\nDigite o codigo do evento:\n");
-                scanf("%s",evento);
-
-                fprintf(arquivo, "%s,%s,%s\n", id,usuario,evento);
-        }else{
+            fprintf(arquivo, "%s,%s,%s\n", nome, email, senha);
+        }
+        else if (strcmp(tipo, "tickets") == 0)
+        {
+            char evento[128];
+            printf("\nDigite o código do evento:\n");
+            scanf("%s", evento);
+            fprintf(arquivo, "%s,%s,%s\n", generateTicket(evento), userCode, evento);
+        }
+        else
+        {
             printf("Tipo de escrita nao encontrado");
         };
 
         fclose(arquivo);
     }
 }
-void writeTicketsFile(){
-    FILE* arquivo = fopen("tickets.csv", "a+");
+void writeTicketsFile()
+{
+    FILE *arquivo = fopen("tickets.csv", "a+");
     writeFile(arquivo, "tickets");
 }
-void writeEventsFile(){
-    FILE* arquivo = fopen("events.csv", "a+");
+void writeEventsFile()
+{
+    FILE *arquivo = fopen("events.csv", "a+");
     writeFile(arquivo, "events");
 }
 
-void paginacao(){
-    printf("%s", userType);
-    if(strcmp( userType, "admin") == 0){
-        printf("\nDigite o valor referente a Funcionalidade: \n1 ==== Visualizar Eventos\n2 ==== Adicionar Evento\n3 ==== Sair\n\n\nFuncionalidade Escolhida: ");
-        scanf("%d", &pagina);
-
-        switch(pagina){
+void paginacao()
+{
+    switch(userType) {
         case 1:
-            readEventsFile();
+            printf("\nDigite o valor referente a Funcionalidade: \n1 ==== Visualizar Eventos\n2 ==== Adicionar Evento\n3 ==== Sair\n\n\nFuncionalidade Escolhida: ");
+            scanf("%d", &pagina);
+
+            switch (pagina)
+            {
+            case 1:
+                readEventsFile();
+                break;
+            case 2:
+                writeEventsFile();
+                break;
+            case 3:
+                break;
+            default:
+                printf("\nPágina não existente!\n");
+            }
+
+            while (pagina != 3)
+            {
+                paginacao();
+            };
             break;
         case 2:
-            printf("\nAdquirir Ingresso!\n");
-            writeEventsFile();
-            break;
-        case 3:
+            printf("\nDigite o valor referente a Funcionalidade: \n1 ==== Visualizar Eventos\n2 ==== Adquirir Ingresso\n3 ==== Minhas Horas Complementares\n4 ==== Sair\n\n\nFuncionalidade Escolhida: ");
+            scanf("%d", &pagina);
+
+            switch (pagina)
+            {
+            case 1:
+                readEventsFile();
+                break;
+            case 2:
+                writeTicketsFile();
+                break;
+            case 3:
+                readEventsFile();
+                break;
+            case 4:
+                break;
+            default:
+                printf("\nPágina não existente!\n");
+            }
+            while (pagina != 4)
+            {
+                paginacao();
+            }
             break;
         default:
-            printf("\nPágina não existente!\n");
-        }
-
-        while(pagina != 3){
-            paginacao();
-        };
-    }else{
-        printf("\nDigite o valor referente a Funcionalidade: \n1 ==== Visualizar Eventos\n2 ==== Adquirir Ingresso\n3 ==== Sair\n\n\nFuncionalidade Escolhida: ");
-        scanf("%d", &pagina);
-
-        switch(pagina){
-        case 1:
-            readEventsFile();
-            break;
-        case 2:
-            printf("\nAdquirir Ingresso!\n");
-            writeEventsFile();
-            break;
-        case 3:
-            break;
-        default:
-            printf("\nPágina não existente!\n");
-        }
-
-        while(pagina != 3){
-            paginacao();
-        };
+            printf("Tipo de usuário não encontrado. Tipo:%d",userType);
     }
-
-
 }
 
-int main(){
-    setlocale(LC_ALL, "Portuguese");
-    //Login
-    printf("Digite seu código de usuário:");
-    scanf("%s",&userCode);
+int main()
+{
+    // Login
+    login();
     readUsersFile();
 
-    //Navegação
+    // Navegação
     paginacao();
 
     printf("\n\n\nObrigado por utilizar nosso sistema!\n\n\n");
