@@ -4,21 +4,24 @@
 #include <locale.h>
 #include <iostream>
 #include <fstream>
+#include <string>
 
 using namespace std;
-int pagina, userType = 0;
-float horasAcumuladas = 0;
-char userCode[20], validationCode[20];
+int pagina, userType = 0, horasAcumuladas = 0, eventoHoras = 0;
+char userCode[20], userPwd[20], validationCode[20];
+string eventCodeValidation;
 
 char* generateTicket (char* tipo){
     char* ch = new char;
     strcpy(ch,tipo);
+    strcat(ch,"-");
     strcat(ch,userCode);
     return ch;
 }
 
 void readFile(std::ifstream &ip, const char *tipo)
 {
+    int inc = 0;
     if (!ip.is_open())
     {
         printf("\n\n\nErro ao ler arquivo\n\n\n");
@@ -38,7 +41,23 @@ void readFile(std::ifstream &ip, const char *tipo)
                 getline(ip, name, ',');
                 getline(ip, local, ',');
                 getline(ip, hours, '\n');
-                printf("\n\n%s\t%s\t%s\t%s\n", code.c_str(), name.c_str(), local.c_str(), hours.c_str());
+                if(name.length() > 0){
+                    inc++;
+                    printf("Codigo do evento: %s\tNome do evento:%s\nLocal: %s\nHoras curriculares: %s\n\n", code.c_str(), name.c_str(), local.c_str(), hours.c_str());
+                };
+            }
+            else if (strcmp(tipo, "eventsHours") == 0 )
+            {
+                inc++;
+                string code, name, local, hours;
+
+                getline(ip, code, ',');
+                getline(ip, name, ',');
+                getline(ip, local, ',');
+                getline(ip, hours, '\n');
+                    if (strcmp(code.c_str(), eventCodeValidation.c_str()) == 0){
+                        eventoHoras = stoi(hours);
+                    };
             }
             else if (strcmp(tipo, "ownTickets") == 0 )
             {
@@ -50,19 +69,23 @@ void readFile(std::ifstream &ip, const char *tipo)
                 getline(ip, hours, ',');
                 getline(ip, status, '\n');
                 if (strcmp(userId.c_str(), userCode) == 0){
+                    inc++;
                     printf("%s\t%s\t%s\t%s\t%s\n", eventCode.c_str(), userId.c_str(), eventId.c_str(), hours.c_str(), status.c_str());
                     if(status == "1"){
-                        horasAcumuladas += std::stoi( hours );
+                        //Incrementa horas acumuladas dos tickets ativos do usuario
+                        int horasAcumuladasAtivas = stoi(hours);
+                        horasAcumuladas += horasAcumuladasAtivas;
                     };
                 };
             }
             else if (strcmp(tipo, "validationTickets") == 0 )
             {
-                string ticketCode, eventId, status, userId;
+                string ticketCode, eventId, status, hours, userId;
 
                 getline(ip, ticketCode, ',');
                 getline(ip, userId, ',');
                 getline(ip, eventId, ',');
+                getline(ip, hours, ',');
                 getline(ip, status, '\n');
                 if(ticketCode.c_str() != NULL){
                         string res;
@@ -72,25 +95,29 @@ void readFile(std::ifstream &ip, const char *tipo)
                         res.append(",");
                         res.append(eventId.c_str());
                         res.append(",");
+                        res.append(hours.c_str());
+                        res.append(",");
 
                         if (strcmp(ticketCode.c_str(), validationCode) == 0){
                             res.append("1");
                         }else{
                             res.append(status.c_str());
                         }
-                        if(res != ",,,"){
+                        if(res != ",,,,"){
                             res.append("\n");
-                            cout << res;
+                            inc++;
                             fprintf(ticketsBackup, res.c_str());
                         };
                     };
             }
             else if (strcmp(tipo, "users") == 0)
             {
-                string code, type;
+                inc++;
+                string code, pwd, type;
                 getline(ip, code, ',');
+                getline(ip, pwd, ',');
                 getline(ip, type, '\n');
-                if (strcmp(code.c_str(), userCode) == 0)
+                if (strcmp(code.c_str(), userCode) == 0 && strcmp(pwd.c_str(), userPwd) == 0)
                 {
                     if (strcmp(type.c_str(), "admin") == 0)
                     {
@@ -104,52 +131,92 @@ void readFile(std::ifstream &ip, const char *tipo)
             };
         };
         ip.close();
-
-        if(strcmp(tipo, "validationTickets") == 0){
+        if(inc <= 0){
+            printf("\n\nSEM DADOS PARA VISUALIZACAO");
+        }else if(strcmp(tipo, "validationTickets") == 0){
             fclose(ticketsBackup);
-            FILE *ticketBackup = fopen("./dados/backup/tickets.csv","r");
-            FILE *tickets = fopen("./dados/tickets.csv","a+");
-            char leitor[1000];
-
-            while(fgets(leitor, 1000, ticketBackup) != NULL);
-            fputs(leitor, tickets);
-        }
+            ifstream ticketBackup("./dados/backup/tickets.csv");
+            FILE *tickets = fopen("./dados/tickets.csv","w+");
+            while (ticketBackup.good()){
+                string ticketCode, userId, eventId, hours, status;
+                getline(ticketBackup, ticketCode, ',');
+                getline(ticketBackup, userId, ',');
+                getline(ticketBackup, eventId, ',');
+                getline(ticketBackup, hours, ',');
+                getline(ticketBackup, status, '\n');
+                if(ticketCode.length() > 0){
+                    fprintf(tickets, "%s,%s,%s,%s,%s\n", ticketCode.c_str(), userId.c_str(), eventId.c_str(), hours.c_str(), status.c_str());
+                };
+            };
+            ticketBackup.close();
+            fclose(tickets);
+        };
     };
 };
 
 
 void readEventsFile()
 {
+    printf("\n\n####### EVENTOS #######\n\n");
     ifstream ip("./dados/events.csv");
     readFile(ip, "events");
+    printf("\n\n\n\n");
 }
 void readTicketsFile()
 {
+    horasAcumuladas = 0;
+    printf("\n\n####### INGRESSOS #######\n\n");
     ifstream ip("./dados/tickets.csv");
     readFile(ip, "ownTickets");
+
+    printf("\nHoras Complementares Ativas: %d\n\n\n\n", horasAcumuladas);
 }
-void ticketValidation()
-{
-    printf("Digite o codigo de validacao:");
-    scanf("%s", validationCode);
-    ifstream ip("./dados/tickets.csv");
-    readFile(ip, "validationTickets");
-}
+
 void readUsersFile()
 {
     ifstream ip("./dados/users.csv");
     readFile(ip, "users");
 }
 
-
-void login(){
-    setlocale(LC_ALL, "Portuguese");
-    printf("Digite seu codigo de usuario:");
-    scanf("%s", userCode);
-
-    readUsersFile();
+void readEventHoursFile()
+{
+    ifstream ip("./dados/events.csv");
+    readFile(ip, "eventsHours");
 }
 
+void ticketValidation()
+{
+    printf("\n\n####### VALIDAR INGRESSO #######\n\n");
+    printf("Digite o codigo de validacao: ");
+    scanf("%s", validationCode);
+    ifstream ip("./dados/tickets.csv");
+    readFile(ip, "validationTickets");
+    printf("\n\n\n\n");
+}
+
+void login(){
+    do{
+        printf("\n\n\n\n\n####### LOGIN #######\n\n");
+        setlocale(LC_ALL, "Portuguese");
+        printf("Digite seu codigo de usuario: ");
+        scanf("%s", userCode);
+        printf("Digite sua senha: ");
+        scanf("%s", userPwd);
+        readUsersFile();
+        if(userType == 0){
+            printf("\nCodigo ou Senha invalidos\n");
+        }
+    }while(userType == 0);
+
+
+
+    printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
+}
+int ifEventExistsReturnItsHours(){
+    eventoHoras = 0;
+    readEventHoursFile();
+    return eventoHoras;
+}
 
 void writeFile(FILE *arquivo, const char *tipo)
 {
@@ -163,13 +230,13 @@ void writeFile(FILE *arquivo, const char *tipo)
         {
             char codigo[128], nome[128], local[128];
             int qtdHoras = 0;
-            printf("\nDigite o codigo do evento:\n");
+            printf("\nDigite o codigo do evento: ");
             scanf("%s", codigo);
-            printf("\nDigite o nome do evento:\n");
+            printf("\nDigite o nome do evento: ");
             scanf("%s", nome);
-            printf("\nDigite o local do evento:\n");
+            printf("\nDigite o local do evento: ");
             scanf("%s", local);
-            printf("\nDigite a qtd. de horas extracurriculares do evento:\n");
+            printf("\nDigite a qtd. de horas extracurriculares do evento: ");
             scanf("%d", &qtdHoras);
 
             fprintf(arquivo, "%s,%s,%s,%d\n", codigo, nome, local, qtdHoras);
@@ -177,11 +244,11 @@ void writeFile(FILE *arquivo, const char *tipo)
         else if (strcmp(tipo, "users") == 0)
         {
             char nome[128], email[128], senha[128];
-            printf("\nDigite o nome do usuario:\n");
+            printf("\nDigite o nome do usuario: ");
             scanf("%s", nome);
-            printf("\nDigite o email do usuario:\n");
+            printf("\nDigite o email do usuario: ");
             scanf("%s", email);
-            printf("\nDigite a senha do usuario:\n");
+            printf("\nDigite a senha do usuario: ");
             scanf("%s", senha);
 
             fprintf(arquivo, "%s,%s,%s\n", nome, email, senha);
@@ -189,17 +256,22 @@ void writeFile(FILE *arquivo, const char *tipo)
         else if (strcmp(tipo, "tickets") == 0)
         {
             char evento[128];
-            printf("\nDigite o codigo do evento:\n");
+            printf("\nDigite o codigo do evento: ");
             scanf("%s", evento);
             char* id = generateTicket(evento);
-            float hours = 0;
             //TODO: Verificar se o evento existe, se o usuário já não se cadastrou no mesmo e pegar as horas do evento
-            printf("\n\n\n\n##### Anote seu ingresso #####\nCodigo: %s\n\n\n", id);
-            fprintf(arquivo, "%s,%s,%s,%2.f,%d\n", id, userCode, evento, hours, 0);
+            eventCodeValidation = evento;
+            int hours = ifEventExistsReturnItsHours();
+            if(hours == 0){
+                printf("\nEvento nao encontrado!\n");
+            }else{
+                printf("\n\n\n\n##### Anote seu ingresso #####\nCodigo: %s\n\n\n", id);
+                fprintf(arquivo, "%s,%s,%s,%d,%d\n", id, userCode, evento, hours, 0);
+            }
         }
         else
         {
-            printf("Tipo de escrita nao encontrado");
+            printf("\nTipo de escrita nao encontrado\n");
         };
 
         fclose(arquivo);
