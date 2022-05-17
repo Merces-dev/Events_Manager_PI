@@ -70,7 +70,7 @@ void readFile(std::ifstream &ip, const char *tipo) {
                 if (strcmp(userId.c_str(), userCode) == 0) {
                     inc++;
                     SetConsoleTextAttribute(hConsole, 8);
-                    printf("Codigo do evento: %s\n", eventCode.c_str());
+                    printf("Codigo do ingresso: %s\n", eventCode.c_str());
                     SetConsoleTextAttribute(hConsole, 7);
                     printf("Codigo Evento: %s\nHoras complementares: %s\nValido: %s\n\n", eventId.c_str(), hours.c_str(), status.c_str());
                     if (status == "1") {
@@ -207,6 +207,10 @@ void ticketValidation() {
         if (validacaoStatus <= 0) {
             SetConsoleTextAttribute(hConsole, 12);
             printf("\nIngresso nao encontrado. Ingresso: %s\n", validationCode);
+            SetConsoleTextAttribute(hConsole, 7);
+        }else{
+            SetConsoleTextAttribute(hConsole, 10);
+            printf("\nIngresso validado com sucesso. Ingresso: %s\n", validationCode);
             SetConsoleTextAttribute(hConsole, 7);
         };
     } else {

@@ -1,14 +1,14 @@
 # depslib dependency file v1.0
-1652773217 source:c:\cpp\events_manager_pi\main.cpp
+1652801064 source:c:\cpp\events_manager_pi\main.cpp
 	<conio.h>
-	<stdio.h>
-	<string.h>
 	<locale.h>
-	<iostream>
-	<fstream>
-	<string>
+	<stdio.h>
 	<stdlib.h>
+	<string.h>
 	<windows.h>
+	<fstream>
+	<iostream>
+	<string>
 
 1651709810 source:c:\cpp\events_manager_pi\read.cpp
 
