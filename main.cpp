@@ -47,7 +47,10 @@ void readFile(std::ifstream &ip, const char *tipo)
                 getline(ip, hours, '\n');
                 if(name.length() > 0){
                     inc++;
-                    printf("Codigo do evento: %s\tNome do evento:%s\nLocal: %s\nHoras curriculares: %s\n\n", code.c_str(), name.c_str(), local.c_str(), hours.c_str());
+                    SetConsoleTextAttribute(hConsole, 8);
+                    printf("Codigo do evento: %s\n", code.c_str());
+                    SetConsoleTextAttribute(hConsole, 7);
+                    printf("Nome do evento: %s\nLocal: %s\nHoras curriculares: %s\n\n",name.c_str(), local.c_str(), hours.c_str());
                 };
             }
             else if (strcmp(tipo, "eventsHours") == 0 )
@@ -74,7 +77,10 @@ void readFile(std::ifstream &ip, const char *tipo)
                 getline(ip, status, '\n');
                 if (strcmp(userId.c_str(), userCode) == 0){
                     inc++;
-                    printf("Codigo Ingresso: %s\nCodigo Evento: %s\nHoras complementares: %s\nValido: %s\n\n", eventCode.c_str(),  eventId.c_str(), hours.c_str(), status.c_str());
+                    SetConsoleTextAttribute(hConsole, 8);
+                    printf("Codigo do evento: %s\n", eventCode.c_str());
+                    SetConsoleTextAttribute(hConsole, 7);
+                    printf("Codigo Evento: %s\nHoras complementares: %s\nValido: %s\n\n", eventId.c_str(), hours.c_str(), status.c_str());
                     if(status == "1"){
                         //Incrementa horas acumuladas dos tickets ativos do usuario
                         int horasAcumuladasAtivas = stoi(hours);
@@ -167,7 +173,6 @@ void readEventsFile()
     SetConsoleTextAttribute(hConsole, 7);
     ifstream ip("./dados/events.csv");
     readFile(ip, "events");
-    printf("\n\n\n\n");
 }
 void readTicketsFile()
 {
