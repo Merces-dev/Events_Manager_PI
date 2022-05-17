@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1652767390 source:c:\cpp\events_manager_pi\main.cpp
+1652769230 source:c:\cpp\events_manager_pi\main.cpp
 	<conio.h>
 	<stdio.h>
 	<string.h>
@@ -7,6 +7,8 @@
 	<iostream>
 	<fstream>
 	<string>
+	<stdlib.h>
+	<windows.h>
 
 1651709810 source:c:\cpp\events_manager_pi\read.cpp
 

@@ -5,11 +5,14 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <stdlib.h>
+#include <windows.h>
 
 using namespace std;
-int pagina, userType = 0, horasAcumuladas = 0, eventoHoras = 0;
+int pagina, userType = 0, horasAcumuladas = 0, eventoHoras = 0, validacaoStatus = 0;
 char userCode[20], userPwd[20], validationCode[20];
 string eventCodeValidation;
+HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
 char* generateTicket (char* tipo){
     char* ch = new char;
@@ -32,6 +35,7 @@ void readFile(std::ifstream &ip, const char *tipo)
         if(strcmp(tipo, "validationTickets") == 0){
             ticketsBackup = fopen("./dados/backup/tickets.csv","a+");
         }
+        validacaoStatus = 0;
         while (ip.good()){
             if (strcmp(tipo, "events") == 0 )
             {
@@ -99,6 +103,7 @@ void readFile(std::ifstream &ip, const char *tipo)
                         res.append(",");
 
                         if (strcmp(ticketCode.c_str(), validationCode) == 0){
+                            validacaoStatus++;
                             res.append("1");
                         }else{
                             res.append(status.c_str());
@@ -157,7 +162,9 @@ void readFile(std::ifstream &ip, const char *tipo)
 
 void readEventsFile()
 {
+    SetConsoleTextAttribute(hConsole, 10);
     printf("\n\n####### EVENTOS #######\n\n");
+    SetConsoleTextAttribute(hConsole, 7);
     ifstream ip("./dados/events.csv");
     readFile(ip, "events");
     printf("\n\n\n\n");
@@ -165,7 +172,9 @@ void readEventsFile()
 void readTicketsFile()
 {
     horasAcumuladas = 0;
+    SetConsoleTextAttribute(hConsole, 10);
     printf("\n\n####### INGRESSOS #######\n\n");
+    SetConsoleTextAttribute(hConsole, 7);
     ifstream ip("./dados/tickets.csv");
     readFile(ip, "ownTickets");
 
@@ -186,17 +195,26 @@ void readEventHoursFile()
 
 void ticketValidation()
 {
+    SetConsoleTextAttribute(hConsole, 10);
     printf("\n\n####### VALIDAR INGRESSO #######\n\n");
+    SetConsoleTextAttribute(hConsole, 7);
     printf("Digite o codigo de validacao: ");
     scanf("%s", validationCode);
     ifstream ip("./dados/tickets.csv");
     readFile(ip, "validationTickets");
+    if(validacaoStatus <= 0){
+        SetConsoleTextAttribute(hConsole, 12);
+        printf("\nIngresso %s nao encontrado\n", validationCode);
+        SetConsoleTextAttribute(hConsole, 7);
+    }
     printf("\n\n\n\n");
 }
 
 void login(){
     do{
+        SetConsoleTextAttribute(hConsole, 10);
         printf("\n\n\n\n\n####### LOGIN #######\n\n");
+        SetConsoleTextAttribute(hConsole, 7);
         setlocale(LC_ALL, "Portuguese");
         printf("Digite seu codigo de usuario: ");
         scanf("%s", userCode);
@@ -204,7 +222,9 @@ void login(){
         scanf("%s", userPwd);
         readUsersFile();
         if(userType == 0){
+            SetConsoleTextAttribute(hConsole, 12);
             printf("\nCodigo ou Senha invalidos\n");
+            SetConsoleTextAttribute(hConsole, 7);
         }
     }while(userType == 0);
 
@@ -263,7 +283,9 @@ void writeFile(FILE *arquivo, const char *tipo)
             eventCodeValidation = evento;
             int hours = ifEventExistsReturnItsHours();
             if(hours == 0){
-                printf("\nEvento nao encontrado!\n");
+                SetConsoleTextAttribute(hConsole, 12);
+                printf("\nEvento %s nao encontrado!\n", evento);
+                SetConsoleTextAttribute(hConsole, 7);
             }else{
                 printf("\n\n\n\n##### Anote seu ingresso #####\nCodigo: %s\n\n\n", id);
                 fprintf(arquivo, "%s,%s,%s,%d,%d\n", id, userCode, evento, hours, 0);
@@ -271,7 +293,9 @@ void writeFile(FILE *arquivo, const char *tipo)
         }
         else
         {
+            SetConsoleTextAttribute(hConsole, 12);
             printf("\nTipo de escrita nao encontrado\n");
+            SetConsoleTextAttribute(hConsole, 7);
         };
 
         fclose(arquivo);
@@ -288,6 +312,9 @@ void writeTicketsFile()
 
 void writeEventsFile()
 {
+    SetConsoleTextAttribute(hConsole, 10);
+    printf("\n\n####### ADICIONAR EVENTO #######\n\n");
+    SetConsoleTextAttribute(hConsole, 7);
     FILE *arquivo = fopen("./dados/events.csv", "a+");
     writeFile(arquivo, "events");
 }
@@ -295,6 +322,9 @@ void writeEventsFile()
 
 void paginacao()
 {
+    SetConsoleTextAttribute(hConsole, 10);
+    printf("\n\n####### HOME #######\n\n");
+    SetConsoleTextAttribute(hConsole, 7);
     switch(userType) {
         case 1:
             printf("\nDigite o valor referente a Funcionalidade: \n1 ==== Visualizar Eventos\n2 ==== Adicionar Evento\n3 ==== Validar Ingresso\n4 ==== Sair\n\n\nFuncionalidade Escolhida: ");
@@ -314,7 +344,9 @@ void paginacao()
             case 4:
                 break;
             default:
+                SetConsoleTextAttribute(hConsole, 12);
                 printf("\nPagina nao existente!\n");
+                SetConsoleTextAttribute(hConsole, 7);
             }
 
             while (pagina != 4)
@@ -340,15 +372,18 @@ void paginacao()
             case 4:
                 break;
             default:
+                SetConsoleTextAttribute(hConsole, 12);
                 printf("\nPagina nao existente!\n");
-            }
+                SetConsoleTextAttribute(hConsole, 7);            }
             while (pagina != 4)
             {
                 paginacao();
             }
             break;
         default:
+            SetConsoleTextAttribute(hConsole, 12);
             printf("Tipo de usuario nao encontrado. Tipo:%d",userType);
+            SetConsoleTextAttribute(hConsole, 7);
     }
 }
 
