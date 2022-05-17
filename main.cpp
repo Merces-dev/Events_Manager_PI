@@ -6,9 +6,9 @@
 #include <fstream>
 
 using namespace std;
-int pagina;
-char userCode[20];
-int userType = 0;
+int pagina, userType = 0;
+float horasAcumuladas = 0;
+char userCode[20], validationCode[20];
 
 char* generateTicket (char* tipo){
     char* ch = new char;
@@ -16,8 +16,6 @@ char* generateTicket (char* tipo){
     strcat(ch,userCode);
     return ch;
 }
-
-
 
 void readFile(std::ifstream &ip, const char *tipo)
 {
@@ -27,6 +25,10 @@ void readFile(std::ifstream &ip, const char *tipo)
     }
     else
     {
+        FILE *ticketsBackup;
+        if(strcmp(tipo, "validationTickets") == 0){
+            ticketsBackup = fopen("./dados/backup/tickets.csv","a+");
+        }
         while (ip.good()){
             if (strcmp(tipo, "events") == 0 )
             {
@@ -40,14 +42,48 @@ void readFile(std::ifstream &ip, const char *tipo)
             }
             else if (strcmp(tipo, "ownTickets") == 0 )
             {
-                string eventCode, eventId, userId;
+                string eventCode, eventId, hours, status, userId;
 
                 getline(ip, eventCode, ',');
                 getline(ip, userId, ',');
-                getline(ip, eventId, '\n');
+                getline(ip, eventId, ',');
+                getline(ip, hours, ',');
+                getline(ip, status, '\n');
                 if (strcmp(userId.c_str(), userCode) == 0){
-                    printf("%s\t%s\t%s\n", eventCode.c_str(), userId.c_str(), eventId.c_str());
+                    printf("%s\t%s\t%s\t%s\t%s\n", eventCode.c_str(), userId.c_str(), eventId.c_str(), hours.c_str(), status.c_str());
+                    if(status == "1"){
+                        horasAcumuladas += std::stoi( hours );
+                    };
                 };
+            }
+            else if (strcmp(tipo, "validationTickets") == 0 )
+            {
+                string ticketCode, eventId, status, userId;
+
+                getline(ip, ticketCode, ',');
+                getline(ip, userId, ',');
+                getline(ip, eventId, ',');
+                getline(ip, status, '\n');
+                if(ticketCode.c_str() != NULL){
+                        string res;
+                        res.append(ticketCode.c_str());
+                        res.append(",");
+                        res.append(userId.c_str());
+                        res.append(",");
+                        res.append(eventId.c_str());
+                        res.append(",");
+
+                        if (strcmp(ticketCode.c_str(), validationCode) == 0){
+                            res.append("1");
+                        }else{
+                            res.append(status.c_str());
+                        }
+                        if(res != ",,,"){
+                            res.append("\n");
+                            cout << res;
+                            fprintf(ticketsBackup, res.c_str());
+                        };
+                    };
             }
             else if (strcmp(tipo, "users") == 0)
             {
@@ -68,8 +104,20 @@ void readFile(std::ifstream &ip, const char *tipo)
             };
         };
         ip.close();
+
+        if(strcmp(tipo, "validationTickets") == 0){
+            fclose(ticketsBackup);
+            FILE *ticketBackup = fopen("./dados/backup/tickets.csv","r");
+            FILE *tickets = fopen("./dados/tickets.csv","a+");
+            char leitor[1000];
+
+            while(fgets(leitor, 1000, ticketBackup) != NULL);
+            fputs(leitor, tickets);
+        }
     };
 };
+
+
 void readEventsFile()
 {
     ifstream ip("./dados/events.csv");
@@ -80,11 +128,20 @@ void readTicketsFile()
     ifstream ip("./dados/tickets.csv");
     readFile(ip, "ownTickets");
 }
+void ticketValidation()
+{
+    printf("Digite o codigo de validacao:");
+    scanf("%s", validationCode);
+    ifstream ip("./dados/tickets.csv");
+    readFile(ip, "validationTickets");
+}
 void readUsersFile()
 {
     ifstream ip("./dados/users.csv");
     readFile(ip, "users");
 }
+
+
 void login(){
     setlocale(LC_ALL, "Portuguese");
     printf("Digite seu codigo de usuario:");
@@ -92,11 +149,13 @@ void login(){
 
     readUsersFile();
 }
+
+
 void writeFile(FILE *arquivo, const char *tipo)
 {
     if (arquivo == NULL)
     {
-        printf("\n\n\nErro ao obter eventos dispon�veis\n\n\n");
+        printf("\n\n\nErro ao obter eventos disponiveis\n\n\n");
     }
     else
     {
@@ -130,9 +189,13 @@ void writeFile(FILE *arquivo, const char *tipo)
         else if (strcmp(tipo, "tickets") == 0)
         {
             char evento[128];
-            printf("\nDigite o código do evento:\n");
+            printf("\nDigite o codigo do evento:\n");
             scanf("%s", evento);
-            fprintf(arquivo, "%s,%s,%s\n", generateTicket(evento), userCode, evento);
+            char* id = generateTicket(evento);
+            float hours = 0;
+            //TODO: Verificar se o evento existe, se o usuário já não se cadastrou no mesmo e pegar as horas do evento
+            printf("\n\n\n\n##### Anote seu ingresso #####\nCodigo: %s\n\n\n", id);
+            fprintf(arquivo, "%s,%s,%s,%2.f,%d\n", id, userCode, evento, hours, 0);
         }
         else
         {
@@ -142,22 +205,27 @@ void writeFile(FILE *arquivo, const char *tipo)
         fclose(arquivo);
     }
 }
+
+
 void writeTicketsFile()
 {
     FILE *arquivo = fopen("./dados/tickets.csv", "a+");
     writeFile(arquivo, "tickets");
 }
+
+
 void writeEventsFile()
 {
     FILE *arquivo = fopen("./dados/events.csv", "a+");
     writeFile(arquivo, "events");
 }
 
+
 void paginacao()
 {
     switch(userType) {
         case 1:
-            printf("\nDigite o valor referente a Funcionalidade: \n1 ==== Visualizar Eventos\n2 ==== Adicionar Evento\n3 ==== Sair\n\n\nFuncionalidade Escolhida: ");
+            printf("\nDigite o valor referente a Funcionalidade: \n1 ==== Visualizar Eventos\n2 ==== Adicionar Evento\n3 ==== Validar Ingresso\n4 ==== Sair\n\n\nFuncionalidade Escolhida: ");
             scanf("%d", &pagina);
 
             switch (pagina)
@@ -169,12 +237,15 @@ void paginacao()
                 writeEventsFile();
                 break;
             case 3:
+                ticketValidation();
+                break;
+            case 4:
                 break;
             default:
-                printf("\nPágina não existente!\n");
+                printf("\nPagina nao existente!\n");
             }
 
-            while (pagina != 3)
+            while (pagina != 4)
             {
                 paginacao();
             };
@@ -197,7 +268,7 @@ void paginacao()
             case 4:
                 break;
             default:
-                printf("\nPágina não existente!\n");
+                printf("\nPagina nao existente!\n");
             }
             while (pagina != 4)
             {
@@ -205,7 +276,7 @@ void paginacao()
             }
             break;
         default:
-            printf("Tipo de usuário não encontrado. Tipo:%d",userType);
+            printf("Tipo de usuario nao encontrado. Tipo:%d",userType);
     }
 }
 
