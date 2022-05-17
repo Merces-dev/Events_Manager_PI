@@ -33,7 +33,7 @@ void readFile(std::ifstream &ip, const char *tipo)
     {
         FILE *ticketsBackup;
         if(strcmp(tipo, "validationTickets") == 0){
-            ticketsBackup = fopen("./dados/backup/tickets.csv","a+");
+            ticketsBackup = fopen("./dados/backup/tickets.csv","w+");
         }
         validacaoStatus = 0;
         while (ip.good()){
@@ -59,9 +59,9 @@ void readFile(std::ifstream &ip, const char *tipo)
                 getline(ip, name, ',');
                 getline(ip, local, ',');
                 getline(ip, hours, '\n');
-                    if (strcmp(code.c_str(), eventCodeValidation.c_str()) == 0){
-                        eventoHoras = stoi(hours);
-                    };
+                if (strcmp(code.c_str(), eventCodeValidation.c_str()) == 0){
+                    eventoHoras = stoi(hours);
+                };
             }
             else if (strcmp(tipo, "ownTickets") == 0 )
             {
@@ -74,7 +74,7 @@ void readFile(std::ifstream &ip, const char *tipo)
                 getline(ip, status, '\n');
                 if (strcmp(userId.c_str(), userCode) == 0){
                     inc++;
-                    printf("%s\t%s\t%s\t%s\t%s\n", eventCode.c_str(), userId.c_str(), eventId.c_str(), hours.c_str(), status.c_str());
+                    printf("Codigo Ingresso: %s\nCodigo Evento: %s\nHoras complementares: %s\nValido: %s\n\n", eventCode.c_str(),  eventId.c_str(), hours.c_str(), status.c_str());
                     if(status == "1"){
                         //Incrementa horas acumuladas dos tickets ativos do usuario
                         int horasAcumuladasAtivas = stoi(hours);
@@ -177,8 +177,9 @@ void readTicketsFile()
     SetConsoleTextAttribute(hConsole, 7);
     ifstream ip("./dados/tickets.csv");
     readFile(ip, "ownTickets");
-
+    SetConsoleTextAttribute(hConsole, 3);
     printf("\nHoras Complementares Ativas: %d\n\n\n\n", horasAcumuladas);
+    SetConsoleTextAttribute(hConsole, 7);
 }
 
 void readUsersFile()
@@ -195,18 +196,42 @@ void readEventHoursFile()
 
 void ticketValidation()
 {
+    int validacaoIngressoExistente = 0;
+
     SetConsoleTextAttribute(hConsole, 10);
     printf("\n\n####### VALIDAR INGRESSO #######\n\n");
     SetConsoleTextAttribute(hConsole, 7);
+
     printf("Digite o codigo de validacao: ");
     scanf("%s", validationCode);
     ifstream ip("./dados/tickets.csv");
-    readFile(ip, "validationTickets");
-    if(validacaoStatus <= 0){
-        SetConsoleTextAttribute(hConsole, 12);
-        printf("\nIngresso %s nao encontrado\n", validationCode);
-        SetConsoleTextAttribute(hConsole, 7);
-    }
+    while(ip.good()){
+        string ticketCode, userId, eventId, eventHours, status;
+
+        getline(ip, ticketCode, ',');
+        getline(ip, userId, ',');
+        getline(ip, eventId, ',');
+        getline(ip, eventHours, ',');
+        getline(ip, status, '\n');
+        if (ticketCode == validationCode && status == "1"){
+            validacaoIngressoExistente++;
+        };
+    };
+    ip.close();
+    if(validacaoIngressoExistente == 0){
+        ifstream ip("./dados/tickets.csv");
+        readFile(ip, "validationTickets");
+        if(validacaoStatus <= 0){
+            SetConsoleTextAttribute(hConsole, 12);
+            printf("\nIngresso nao encontrado. Ingresso: %s\n", validationCode);
+            SetConsoleTextAttribute(hConsole, 7);
+        };
+    }else{
+            SetConsoleTextAttribute(hConsole, 12);
+            printf("\nIngresso ja validado. Ingresso: %s\n", validationCode);
+            SetConsoleTextAttribute(hConsole, 7);
+    };
+
     printf("\n\n\n\n");
 }
 
@@ -276,18 +301,41 @@ void writeFile(FILE *arquivo, const char *tipo)
         else if (strcmp(tipo, "tickets") == 0)
         {
             char evento[128];
+            int validacaoIngressoExistente = 0;
             printf("\nDigite o codigo do evento: ");
             scanf("%s", evento);
             char* id = generateTicket(evento);
             //TODO: Verificar se o evento existe, se o usuário já não se cadastrou no mesmo e pegar as horas do evento
             eventCodeValidation = evento;
             int hours = ifEventExistsReturnItsHours();
-            if(hours == 0){
+            ifstream ip("./dados/tickets.csv");
+            while(ip.good()){
+                string ticketCode, userId, eventId, eventHours, status;
+
+                getline(ip, ticketCode, ',');
+                getline(ip, userId, ',');
+                getline(ip, eventId, ',');
+                getline(ip, eventHours, ',');
+                getline(ip, status, '\n');
+                if (ticketCode == id){
+                    validacaoIngressoExistente++;
+                };
+            }
+            ip.close();
+            if(validacaoIngressoExistente != 0){
                 SetConsoleTextAttribute(hConsole, 12);
-                printf("\nEvento %s nao encontrado!\n", evento);
+                printf("\nIngresso ja existente. Ingresso: %s\n", id);
+                SetConsoleTextAttribute(hConsole, 7);
+            }
+            else if(hours == 0){
+                SetConsoleTextAttribute(hConsole, 12);
+                printf("\nEvento nao encontrado! Evento: %s\n", evento);
                 SetConsoleTextAttribute(hConsole, 7);
             }else{
-                printf("\n\n\n\n##### Anote seu ingresso #####\nCodigo: %s\n\n\n", id);
+                SetConsoleTextAttribute(hConsole, 3);
+                printf("\n\n\n\n##### Anote seu ingresso #####");
+                SetConsoleTextAttribute(hConsole, 7);
+                printf("\nCodigo: %s\n\n\n", id);
                 fprintf(arquivo, "%s,%s,%s,%d,%d\n", id, userCode, evento, hours, 0);
             }
         }
