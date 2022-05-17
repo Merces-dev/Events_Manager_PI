@@ -358,6 +358,9 @@ void writeFile(FILE *arquivo, const char *tipo)
 
 void writeTicketsFile()
 {
+    SetConsoleTextAttribute(hConsole, 10);
+    printf("\n\n####### ADQUIRIR INGRESSO #######\n\n");
+    SetConsoleTextAttribute(hConsole, 7);
     FILE *arquivo = fopen("./dados/tickets.csv", "a+");
     writeFile(arquivo, "tickets");
 }
@@ -427,7 +430,8 @@ void paginacao()
             default:
                 SetConsoleTextAttribute(hConsole, 12);
                 printf("\nPagina nao existente!\n");
-                SetConsoleTextAttribute(hConsole, 7);            }
+                SetConsoleTextAttribute(hConsole, 7);
+                }
             while (pagina != 4)
             {
                 paginacao();
