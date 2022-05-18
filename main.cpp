@@ -150,7 +150,7 @@ void readFile(std::ifstream &ip, const char *tipo) {
 };
 
 void readEventsFile() {
-    SetConsoleTextAttribute(hConsole, 10);
+    SetConsoleTextAttribute(hConsole, 6);
     printf("\n\n####### EVENTOS #######\n\n");
     SetConsoleTextAttribute(hConsole, 7);
     ifstream ip("./dados/events.csv");
@@ -158,7 +158,7 @@ void readEventsFile() {
 }
 void readTicketsFile() {
     horasAcumuladas = 0;
-    SetConsoleTextAttribute(hConsole, 10);
+    SetConsoleTextAttribute(hConsole, 6);
     printf("\n\n####### INGRESSOS #######\n\n");
     SetConsoleTextAttribute(hConsole, 7);
     ifstream ip("./dados/tickets.csv");
@@ -181,7 +181,7 @@ void readEventHoursFile() {
 void ticketValidation() {
     int validacaoIngressoExistente = 0;
 
-    SetConsoleTextAttribute(hConsole, 10);
+    SetConsoleTextAttribute(hConsole, 6);
     printf("\n\n####### VALIDAR INGRESSO #######\n\n");
     SetConsoleTextAttribute(hConsole, 7);
 
@@ -209,7 +209,7 @@ void ticketValidation() {
             printf("\nIngresso nao encontrado. Ingresso: %s\n", validationCode);
             SetConsoleTextAttribute(hConsole, 7);
         }else{
-            SetConsoleTextAttribute(hConsole, 10);
+            SetConsoleTextAttribute(hConsole, 6);
             printf("\nIngresso validado com sucesso. Ingresso: %s\n", validationCode);
             SetConsoleTextAttribute(hConsole, 7);
         };
@@ -224,7 +224,7 @@ void ticketValidation() {
 
 void login() {
     do {
-        SetConsoleTextAttribute(hConsole, 10);
+        SetConsoleTextAttribute(hConsole, 6);
         printf("\n\n\n\n\n####### LOGIN #######\n\n");
         SetConsoleTextAttribute(hConsole, 7);
         setlocale(LC_ALL, "Portuguese");
@@ -324,7 +324,7 @@ void writeFile(FILE *arquivo, const char *tipo) {
 }
 
 void writeTicketsFile() {
-    SetConsoleTextAttribute(hConsole, 10);
+    SetConsoleTextAttribute(hConsole, 6);
     printf("\n\n####### ADQUIRIR INGRESSO #######\n\n");
     SetConsoleTextAttribute(hConsole, 7);
     FILE *arquivo = fopen("./dados/tickets.csv", "a+");
@@ -332,7 +332,7 @@ void writeTicketsFile() {
 }
 
 void writeEventsFile() {
-    SetConsoleTextAttribute(hConsole, 10);
+    SetConsoleTextAttribute(hConsole, 6);
     printf("\n\n####### ADICIONAR EVENTO #######\n\n");
     SetConsoleTextAttribute(hConsole, 7);
     FILE *arquivo = fopen("./dados/events.csv", "a+");
@@ -340,7 +340,7 @@ void writeEventsFile() {
 }
 
 void paginacao() {
-    SetConsoleTextAttribute(hConsole, 10);
+    SetConsoleTextAttribute(hConsole, 6);
     printf("\n\n####### HOME #######\n\n");
     SetConsoleTextAttribute(hConsole, 7);
     switch (userType) {
@@ -408,8 +408,9 @@ int main() {
 
     // Navegação
     paginacao();
-
+    SetConsoleTextAttribute(hConsole, 6);
     printf("\n\n\nObrigado por utilizar nosso sistema!\n\n\n");
+    SetConsoleTextAttribute(hConsole, 7);
 
     return 0;
 }
