@@ -33,7 +33,6 @@
 			<Add option="-fexceptions" />
 		</Compiler>
 		<Unit filename="main.cpp" />
-		<Unit filename="read.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

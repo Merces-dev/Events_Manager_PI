@@ -8,7 +8,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-
+// SOFTWARE PARA ADMINISTRAÇÃO DOS EVENTOS DA FACULDADE
 using namespace std;
 int pagina, userType = 0, horasAcumuladas = 0, eventoHoras = 0, validacaoStatus = 0;
 char userCode[20], userPwd[20], validationCode[20];
@@ -237,7 +237,7 @@ void login() {
             SetConsoleTextAttribute(hConsole, 12);
             printf("\nCodigo ou Senha invalidos\n");
             SetConsoleTextAttribute(hConsole, 7);
-        }
+        };
     } while (userType == 0);
 
     printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
@@ -296,7 +296,7 @@ void writeFile(FILE *arquivo, const char *tipo) {
                 if (ticketCode == id) {
                     validacaoIngressoExistente++;
                 };
-            }
+            };
             ip.close();
             if (validacaoIngressoExistente != 0) {
                 SetConsoleTextAttribute(hConsole, 12);
@@ -312,7 +312,7 @@ void writeFile(FILE *arquivo, const char *tipo) {
                 SetConsoleTextAttribute(hConsole, 7);
                 printf("\nCodigo: %s\n\n\n", id);
                 fprintf(arquivo, "%s,%s,%s,%d,%d\n", id, userCode, evento, hours, 0);
-            }
+            };
         } else {
             SetConsoleTextAttribute(hConsole, 12);
             printf("\nTipo de escrita nao encontrado\n");
@@ -320,8 +320,8 @@ void writeFile(FILE *arquivo, const char *tipo) {
         };
 
         fclose(arquivo);
-    }
-}
+    };
+};
 
 void writeTicketsFile() {
     SetConsoleTextAttribute(hConsole, 6);
@@ -403,6 +403,12 @@ void paginacao() {
 }
 
 int main() {
+    SetConsoleTextAttribute(hConsole, 7);
+    printf("#################################################################\n#####");
+    SetConsoleTextAttribute(hConsole, 6);
+    printf(" SOFTWARE PARA ADMINISTRACAO DOS EVENTOS DA FACULDADE ");
+    SetConsoleTextAttribute(hConsole, 7);
+    printf("######\n#################################################################");
     // Login
     login();
 
